@@ -2,10 +2,9 @@
 using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
 using Silk.NET.Windowing;
-using SkiaBlend.Helpers;
 using SkiaBlend.Shaders;
 using SkiaBlend.Tools;
-using Plane = SkiaBlend.Tools.Plane;
+using System.Drawing;
 
 namespace SkiaBlend;
 
@@ -24,9 +23,6 @@ public unsafe class Game : IDisposable
     private Camera demoCamera = null!;
 
     private ModelShader modelShader = null!;
-    private Plane plane = null!;
-
-    private Matrix4X4<float> orthographic = Matrix4X4<float>.Identity;
 
     #region Input
     private IMouse mouse = null!;
@@ -70,13 +66,12 @@ public unsafe class Game : IDisposable
             Position = new Vector3D<float>(0.0f, 2.0f, 8.0f),
             Fov = 45.0f
         };
-        skiaFrame = new SkiaFrame(Width, Height);
+        skiaFrame = new SkiaFrame(gl, Width, Height);
         demoFrame1 = new GLFrame(gl, _window.Samples, 400, 400);
         demoFrame2 = new GLFrame(gl, _window.Samples, 400, 200);
         skiaTex = new Texture2D(gl);
 
         modelShader = new ModelShader(gl);
-        plane = new Plane(gl);
 
         mouse = inputContext.Mice[0];
         keyboard = inputContext.Keyboards[0];
@@ -152,36 +147,12 @@ public unsafe class Game : IDisposable
 
         demoCamera.Width = Width;
         demoCamera.Height = Height;
-
-        float aspectRatio = Width / (float)Height;
-        plane.Model = Matrix4X4.CreateRotationX(MathHelper.DegreesToRadians(-90.0f)) * Matrix4X4.CreateScale(aspectRatio, 1.0f, 1.0f);
-
-        orthographic = Matrix4X4.CreateOrthographic(1.0f * aspectRatio, 1.0f, -1.0f, 1.0f);
     }
 
     private void Window_Render(double obj)
     {
         DrawGL();
         DrawSkia();
-
-        skiaTex.WriteImage((byte*)skiaFrame.Pixels, skiaFrame.Width, skiaFrame.Height);
-
-        gl.Viewport(0, 0, (uint)Width, (uint)Height);
-        gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-
-        gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
-
-        modelShader.Use();
-
-        gl.SetUniform(modelShader.UniMVP, plane.Model * orthographic);
-        gl.SetUniform(modelShader.UniTex, 0);
-
-        gl.ActiveTexture(GLEnum.Texture0);
-        gl.BindTexture(GLEnum.Texture2D, skiaTex.Id);
-
-        plane.Draw(modelShader);
-
-        modelShader.Unuse();
     }
 
     private void DrawGL()
@@ -192,12 +163,16 @@ public unsafe class Game : IDisposable
 
     private void DrawSkia()
     {
+        skiaFrame.Begin(Color.White);
+
         skiaFrame.Demo1();
 
         skiaFrame.DrawFrame(demoFrame1, 10.0f, 10.0f, 1.0f, 1.0f);
         skiaFrame.DrawFrame(demoFrame2, Width - demoFrame2.Width, Height - demoFrame2.Height, 1.0f, 1.0f);
 
         skiaFrame.Demo2();
+
+        skiaFrame.End();
     }
 
     public void Dispose()
