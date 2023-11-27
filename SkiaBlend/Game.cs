@@ -157,12 +157,14 @@ public unsafe class Game : IDisposable
 
     private void DrawGL()
     {
+        // 此处不使用Begin、End包裹，因为GLFrame中直接使用了GL的方法。
         demoFrame1.Demo(modelShader, demoCamera);
         demoFrame2.Demo(modelShader, demoCamera);
     }
 
     private void DrawSkia()
     {
+        // 使用Begin、End包裹，可以将将Skia内容提交到GL中进行绘制。
         skiaFrame.Begin(Color.White);
 
         skiaFrame.Demo1();

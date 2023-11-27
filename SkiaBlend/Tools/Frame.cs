@@ -118,6 +118,7 @@ public abstract unsafe class Frame : IDisposable
 
         surface.Canvas.SetMatrix(matrix);
 
+        // GLFrame 使用颜色缓冲区创建 SKImage, 可以直接绘制。
         if (frame is GLFrame gLFrame)
         {
             surface.Canvas.DrawImage(gLFrame.SKImage, new SKPoint(0, 0));
