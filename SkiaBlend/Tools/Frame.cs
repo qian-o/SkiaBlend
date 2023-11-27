@@ -4,11 +4,14 @@ public abstract unsafe class Frame : IDisposable
 {
     protected int width;
     protected int height;
+    protected nint pixels;
     protected bool isReady;
 
     public int Width => width;
 
     public int Height => height;
+
+    public nint Pixels => pixels;
 
     public bool IsReady => isReady;
 
@@ -25,8 +28,6 @@ public abstract unsafe class Frame : IDisposable
     /// <param name="frame">frame</param>
     /// <param name="matrix">matrix</param>
     public abstract void DrawFrame(Frame frame, float ox, float oy, float sx, float sy);
-
-    public abstract nint GetPixels();
 
     /// <summary>
     /// 清理。

@@ -1,5 +1,7 @@
 ﻿using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
+using SkiaBlend.Shaders;
+using System.Runtime.InteropServices;
 
 namespace SkiaBlend.Tools;
 
@@ -46,6 +48,18 @@ public unsafe class Plane
 
         _gl.BindBuffer(GLEnum.ElementArrayBuffer, eBO);
         _gl.BufferData<uint>(GLEnum.ElementArrayBuffer, (uint)(_indices.Length * sizeof(uint)), _indices, GLEnum.StaticDraw);
+        _gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
+    }
+
+    public void Draw(ModelShader modelShader)
+    {
+        _gl.BindBuffer(GLEnum.ArrayBuffer, VBO);
+        _gl.VertexAttribPointer(modelShader.InPos, 3, GLEnum.Float, false, (uint)sizeof(Vertex), (void*)Marshal.OffsetOf<Vertex>(nameof(Vertex.Position)));
+        _gl.VertexAttribPointer(modelShader.InUV, 2, GLEnum.Float, false, (uint)sizeof(Vertex), (void*)Marshal.OffsetOf<Vertex>(nameof(Vertex.TexCoords)));
+        _gl.BindBuffer(GLEnum.ArrayBuffer, 0);
+
+        _gl.BindBuffer(GLEnum.ElementArrayBuffer, EBO);
+        _gl.DrawElements(GLEnum.Triangles, (uint)Indices.Length, GLEnum.UnsignedInt, (void*)0);
         _gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
     }
 }

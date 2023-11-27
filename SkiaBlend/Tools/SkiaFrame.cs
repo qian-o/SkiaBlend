@@ -5,24 +5,23 @@ namespace SkiaBlend.Tools;
 
 public unsafe class SkiaFrame : Frame
 {
-    private nint pixels;
+    private static readonly SKPaint _demo1;
+    private static readonly SKPaint _demo2;
+    private static readonly SKPaint _drawFrame;
+
     private SKSurface? surface;
     private SKCanvas? canvas;
 
-    private static SKPaint demo1;
-    private static SKPaint demo2;
-    private static SKPaint drawFrame;
-
     static SkiaFrame()
     {
-        demo1 = new SKPaint
+        _demo1 = new SKPaint
         {
             IsAntialias = true,
             FilterQuality = SKFilterQuality.High,
             Color = SKColors.Red
         };
 
-        demo2 = new SKPaint
+        _demo2 = new SKPaint
         {
             IsAntialias = true,
             FilterQuality = SKFilterQuality.High,
@@ -31,7 +30,7 @@ public unsafe class SkiaFrame : Frame
             TextSize = 50
         };
 
-        drawFrame = new SKPaint
+        _drawFrame = new SKPaint
         {
             IsAntialias = true,
             FilterQuality = SKFilterQuality.High
@@ -66,7 +65,7 @@ public unsafe class SkiaFrame : Frame
         }
 
         SKBitmap bitmap = new(frame.Width, frame.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-        bitmap.SetPixels(frame.GetPixels());
+        bitmap.SetPixels(frame.Pixels);
 
         SKMatrix matrix = SKMatrix.CreateScale(1, -1);
         matrix.TransX = 0;
@@ -77,14 +76,9 @@ public unsafe class SkiaFrame : Frame
 
         canvas!.SetMatrix(matrix);
 
-        canvas.DrawBitmap(bitmap, SKRect.Create(0, 0, frame.Width, frame.Height), drawFrame);
+        canvas.DrawBitmap(bitmap, SKRect.Create(0, 0, frame.Width, frame.Height), _drawFrame);
 
         canvas.ResetMatrix();
-    }
-
-    public override nint GetPixels()
-    {
-        return pixels;
     }
 
     public void Demo1()
@@ -96,14 +90,14 @@ public unsafe class SkiaFrame : Frame
 
         canvas!.Clear(SKColors.White);
 
-        demo1.Color = SKColors.Red;
-        canvas.DrawCircle(width / 2, height / 2, 100, demo1);
+        _demo1.Color = SKColors.Red;
+        canvas.DrawCircle(width / 2, height / 2, 100, _demo1);
 
-        demo1.Color = SKColors.Green;
-        canvas.DrawCircle(width / 2 + 100, height / 2, 100, demo1);
+        _demo1.Color = SKColors.Green;
+        canvas.DrawCircle(width / 2 + 100, height / 2, 100, _demo1);
 
-        demo1.Color = SKColors.Blue;
-        canvas.DrawCircle(width / 2 + 200, height / 2, 100, demo1);
+        _demo1.Color = SKColors.Blue;
+        canvas.DrawCircle(width / 2 + 200, height / 2, 100, _demo1);
     }
 
     public void Demo2()
@@ -113,20 +107,7 @@ public unsafe class SkiaFrame : Frame
             return;
         }
 
-        canvas!.DrawText("Hello World!", 150, 50, demo2);
-    }
-
-    public void Save()
-    {
-        if (!isReady)
-        {
-            return;
-        }
-
-        SKImage image = SKImage.FromPixelCopy(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Premul), pixels);
-        SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
-
-        File.WriteAllBytes("skia.png", data.ToArray());
+        canvas!.DrawText("Hello World!", 150, 50, _demo2);
     }
 
     public override void Destroy()

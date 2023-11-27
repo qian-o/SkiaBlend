@@ -17,8 +17,6 @@ public unsafe class GLFrame : Frame
     private readonly Plane demoPlane = null!;
     private readonly Texture2D demoTex = null!;
 
-    private nint pixels;
-
     public uint Id { get; }
 
     public uint Framebuffer { get; }
@@ -112,14 +110,9 @@ public unsafe class GLFrame : Frame
         _gl.ActiveTexture(GLEnum.Texture0);
         _gl.BindTexture(GLEnum.Texture2D, demoTex.Id);
 
-        _gl.BindBuffer(GLEnum.ArrayBuffer, demoPlane.VBO);
-        _gl.VertexAttribPointer(modelShader.InPos, 3, GLEnum.Float, false, (uint)sizeof(Vertex), (void*)Marshal.OffsetOf<Vertex>(nameof(Vertex.Position)));
-        _gl.VertexAttribPointer(modelShader.InUV, 2, GLEnum.Float, false, (uint)sizeof(Vertex), (void*)Marshal.OffsetOf<Vertex>(nameof(Vertex.TexCoords)));
-        _gl.BindBuffer(GLEnum.ArrayBuffer, 0);
+        demoPlane.Draw(modelShader);
 
-        _gl.BindBuffer(GLEnum.ElementArrayBuffer, demoPlane.EBO);
-        _gl.DrawElements(GLEnum.Triangles, (uint)demoPlane.Indices.Length, GLEnum.UnsignedInt, (void*)0);
-        _gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
+        _gl.ReadPixels(0, 0, (uint)Width, (uint)Height, GLEnum.Rgba, GLEnum.UnsignedByte, (void*)pixels);
     }
 
     public override void Destroy()
@@ -128,18 +121,9 @@ public unsafe class GLFrame : Frame
         _gl.DeleteTexture(Framebuffer);
         _gl.DeleteRenderbuffer(DepthRenderBuffer);
 
-        if (pixels != 0)
+        if (pixels != 0x00)
         {
             Marshal.FreeHGlobal(pixels);
         }
-    }
-
-    public override nint GetPixels()
-    {
-        _gl.BindFramebuffer(GLEnum.Framebuffer, Id);
-        _gl.ReadPixels(0, 0, (uint)Width, (uint)Height, GLEnum.Rgba, GLEnum.UnsignedByte, (void*)pixels);
-        _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
-
-        return pixels;
     }
 }

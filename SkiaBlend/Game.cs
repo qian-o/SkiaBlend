@@ -5,7 +5,6 @@ using Silk.NET.Windowing;
 using SkiaBlend.Helpers;
 using SkiaBlend.Shaders;
 using SkiaBlend.Tools;
-using System.Runtime.InteropServices;
 using Plane = SkiaBlend.Tools.Plane;
 
 namespace SkiaBlend;
@@ -16,10 +15,12 @@ public unsafe class Game : IDisposable
 
     private GL gl = null!;
     private IInputContext inputContext = null!;
+
     private SkiaFrame skiaFrame = null!;
-    private GLFrame glFrame = null!;
     private Texture2D skiaTex = null!;
 
+    private GLFrame demoFrame1 = null!;
+    private GLFrame demoFrame2 = null!;
     private Camera demoCamera = null!;
 
     private ModelShader modelShader = null!;
@@ -32,11 +33,6 @@ public unsafe class Game : IDisposable
     private IKeyboard keyboard = null!;
     private bool firstMove = true;
     private Vector2D<float> lastPos;
-    #endregion
-
-    #region Speeds
-    private readonly float cameraSpeed = 4.0f;
-    private readonly float cameraSensitivity = 0.2f;
     #endregion
 
     public int Width => _window.Size.X;
@@ -55,7 +51,7 @@ public unsafe class Game : IDisposable
 
         _window = Window.Create(windowOptions);
         _window.Load += Window_Load;
-        _window.Resize += Window_Resize;
+        _window.FramebufferResize += Window_Resize;
         _window.Update += Window_Update;
         _window.Render += Window_Render;
     }
@@ -75,7 +71,8 @@ public unsafe class Game : IDisposable
             Fov = 45.0f
         };
         skiaFrame = new SkiaFrame(Width, Height);
-        glFrame = new GLFrame(gl, _window.Samples, 400, 400);
+        demoFrame1 = new GLFrame(gl, _window.Samples, 400, 400);
+        demoFrame2 = new GLFrame(gl, _window.Samples, 400, 200);
         skiaTex = new Texture2D(gl);
 
         modelShader = new ModelShader(gl);
@@ -89,7 +86,10 @@ public unsafe class Game : IDisposable
     {
         gl.Viewport(obj);
 
-        skiaFrame.Resize(obj.X, obj.Y);
+        if (obj.X > 0 && obj.Y > 0)
+        {
+            skiaFrame.Resize(obj.X, obj.Y);
+        }
     }
 
     private void Window_Update(double obj)
@@ -109,8 +109,8 @@ public unsafe class Game : IDisposable
                 float deltaX = vector.X - lastPos.X;
                 float deltaY = vector.Y - lastPos.Y;
 
-                demoCamera.Yaw += deltaX * cameraSensitivity;
-                demoCamera.Pitch += -deltaY * cameraSensitivity;
+                demoCamera.Yaw += deltaX * 0.2f;
+                demoCamera.Pitch += -deltaY * 0.2f;
 
                 lastPos = vector;
             }
@@ -122,32 +122,32 @@ public unsafe class Game : IDisposable
 
         if (keyboard.IsKeyPressed(Key.W))
         {
-            demoCamera.Position += demoCamera.Front * cameraSpeed * (float)obj;
+            demoCamera.Position += demoCamera.Front * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.A))
         {
-            demoCamera.Position -= demoCamera.Right * cameraSpeed * (float)obj;
+            demoCamera.Position -= demoCamera.Right * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.S))
         {
-            demoCamera.Position -= demoCamera.Front * cameraSpeed * (float)obj;
+            demoCamera.Position -= demoCamera.Front * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.D))
         {
-            demoCamera.Position += demoCamera.Right * cameraSpeed * (float)obj;
+            demoCamera.Position += demoCamera.Right * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.Q))
         {
-            demoCamera.Position -= demoCamera.Up * cameraSpeed * (float)obj;
+            demoCamera.Position -= demoCamera.Up * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.E))
         {
-            demoCamera.Position += demoCamera.Up * cameraSpeed * (float)obj;
+            demoCamera.Position += demoCamera.Up * 4.0f * (float)obj;
         }
 
         demoCamera.Width = Width;
@@ -164,7 +164,7 @@ public unsafe class Game : IDisposable
         DrawGL();
         DrawSkia();
 
-        skiaTex.WriteImage((byte*)skiaFrame.GetPixels(), skiaFrame.Width, skiaFrame.Height);
+        skiaTex.WriteImage((byte*)skiaFrame.Pixels, skiaFrame.Width, skiaFrame.Height);
 
         gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
 
@@ -178,24 +178,28 @@ public unsafe class Game : IDisposable
         gl.ActiveTexture(GLEnum.Texture0);
         gl.BindTexture(GLEnum.Texture2D, skiaTex.Id);
 
-        gl.BindBuffer(GLEnum.ArrayBuffer, plane.VBO);
-        gl.VertexAttribPointer(modelShader.InPos, 3, GLEnum.Float, false, (uint)sizeof(Vertex), (void*)Marshal.OffsetOf<Vertex>(nameof(Vertex.Position)));
-        gl.VertexAttribPointer(modelShader.InUV, 2, GLEnum.Float, false, (uint)sizeof(Vertex), (void*)Marshal.OffsetOf<Vertex>(nameof(Vertex.TexCoords)));
-        gl.BindBuffer(GLEnum.ArrayBuffer, 0);
-
-        gl.BindBuffer(GLEnum.ElementArrayBuffer, plane.EBO);
-        gl.DrawElements(GLEnum.Triangles, (uint)plane.Indices.Length, GLEnum.UnsignedInt, (void*)0);
-        gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
+        plane.Draw(modelShader);
     }
 
     private void DrawGL()
     {
-        gl.BindFramebuffer(FramebufferTarget.Framebuffer, glFrame.Id);
-        gl.Viewport(0, 0, (uint)glFrame.Width, (uint)glFrame.Height);
-        demoCamera.Width = glFrame.Width;
-        demoCamera.Height = glFrame.Height;
+        {
+            gl.BindFramebuffer(FramebufferTarget.Framebuffer, demoFrame1.Id);
+            gl.Viewport(0, 0, (uint)demoFrame1.Width, (uint)demoFrame1.Height);
+            demoCamera.Width = demoFrame1.Width;
+            demoCamera.Height = demoFrame1.Height;
 
-        glFrame.Demo(modelShader, demoCamera);
+            demoFrame1.Demo(modelShader, demoCamera);
+        }
+
+        {
+            gl.BindFramebuffer(FramebufferTarget.Framebuffer, demoFrame2.Id);
+            gl.Viewport(0, 0, (uint)demoFrame2.Width, (uint)demoFrame2.Height);
+            demoCamera.Width = demoFrame2.Width;
+            demoCamera.Height = demoFrame2.Height;
+
+            demoFrame2.Demo(modelShader, demoCamera);
+        }
 
         demoCamera.Height = Height;
         demoCamera.Width = Width;
@@ -206,12 +210,17 @@ public unsafe class Game : IDisposable
     private void DrawSkia()
     {
         skiaFrame.Demo1();
-        skiaFrame.DrawFrame(glFrame, 10.0f, 10.0f, 1.0f, 1.0f);
+        skiaFrame.DrawFrame(demoFrame1, 10.0f, 10.0f, 1.0f, 1.0f);
+        skiaFrame.DrawFrame(demoFrame2, Width - demoFrame2.Width, Height - demoFrame2.Height, 1.0f, 1.0f);
         skiaFrame.Demo2();
     }
 
     public void Dispose()
     {
+        skiaTex.Dispose();
+        demoFrame1.Dispose();
+        skiaFrame.Dispose();
+
         GC.SuppressFinalize(this);
     }
 }
