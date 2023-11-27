@@ -1,6 +1,8 @@
-﻿using Silk.NET.Input;
+﻿using ImGuiNET;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
+using Silk.NET.OpenGLES.Extensions.ImGui;
 using Silk.NET.Windowing;
 using SkiaBlend.Shaders;
 using SkiaBlend.Tools;
@@ -14,9 +16,9 @@ public unsafe class Game : IDisposable
 
     private GL gl = null!;
     private IInputContext inputContext = null!;
+    private ImGuiController imGuiController = null!;
 
     private SkiaFrame skiaFrame = null!;
-    private Texture2D skiaTex = null!;
 
     private GLFrame demoFrame1 = null!;
     private GLFrame demoFrame2 = null!;
@@ -59,8 +61,7 @@ public unsafe class Game : IDisposable
 
     private void Window_Load()
     {
-        gl = _window.CreateOpenGLES();
-        inputContext = _window.CreateInput();
+        imGuiController = new ImGuiController(gl = _window.CreateOpenGLES(), _window, inputContext = _window.CreateInput());
         demoCamera = new Camera
         {
             Position = new Vector3D<float>(0.0f, 2.0f, 8.0f),
@@ -69,7 +70,6 @@ public unsafe class Game : IDisposable
         skiaFrame = new SkiaFrame(gl, Width, Height);
         demoFrame1 = new GLFrame(gl, _window.Samples, 400, 400);
         demoFrame2 = new GLFrame(gl, _window.Samples, 400, 200);
-        skiaTex = new Texture2D(gl);
 
         modelShader = new ModelShader(gl);
 
@@ -153,6 +153,14 @@ public unsafe class Game : IDisposable
     {
         DrawGL();
         DrawSkia();
+
+        imGuiController.Update((float)obj);
+
+        ImGui.Begin("Info");
+        ImGui.Value("FPS", ImGui.GetIO().Framerate);
+        ImGui.End();
+
+        imGuiController.Render();
     }
 
     private void DrawGL()
@@ -179,8 +187,8 @@ public unsafe class Game : IDisposable
 
     public void Dispose()
     {
-        skiaTex.Dispose();
         demoFrame1.Dispose();
+        demoFrame2.Dispose();
         skiaFrame.Dispose();
 
         GC.SuppressFinalize(this);

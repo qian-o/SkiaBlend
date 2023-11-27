@@ -112,6 +112,8 @@ public unsafe class GLFrame : Frame
 
     public override void Destroy()
     {
+        base.Destroy();
+
         _gl.DeleteFramebuffer(Id);
         _gl.DeleteTexture(ColorBuffer);
         _gl.DeleteRenderbuffer(DepthRenderBuffer);
