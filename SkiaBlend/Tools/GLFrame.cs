@@ -96,13 +96,16 @@ public unsafe class GLFrame : Frame
 
     public void Demo(ModelShader modelShader, Camera camera)
     {
+        _gl.BindFramebuffer(FramebufferTarget.Framebuffer, Id);
+        _gl.Viewport(0, 0, (uint)Width, (uint)Height);
+        camera.Width = Width;
+        camera.Height = Height;
+
         _gl.ClearColor(Color.Black);
 
         _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
-
-        _gl.UseProgram(modelShader.Id);
-        _gl.EnableVertexAttribArray(modelShader.InPos);
-        _gl.EnableVertexAttribArray(modelShader.InUV);
+        
+        modelShader.Use();
 
         _gl.SetUniform(modelShader.UniMVP, Matrix4X4.CreateScale(2.0f, 0.0f, 2.0f) * camera.View * camera.Projection);
         _gl.SetUniform(modelShader.UniTex, 0);
@@ -111,6 +114,8 @@ public unsafe class GLFrame : Frame
         _gl.BindTexture(GLEnum.Texture2D, demoTex.Id);
 
         demoPlane.Draw(modelShader);
+
+        modelShader.Unuse();
 
         _gl.ReadPixels(0, 0, (uint)Width, (uint)Height, GLEnum.Rgba, GLEnum.UnsignedByte, (void*)pixels);
     }

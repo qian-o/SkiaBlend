@@ -166,11 +166,12 @@ public unsafe class Game : IDisposable
 
         skiaTex.WriteImage((byte*)skiaFrame.Pixels, skiaFrame.Width, skiaFrame.Height);
 
+        gl.Viewport(0, 0, (uint)Width, (uint)Height);
+        gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
         gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
 
-        gl.UseProgram(modelShader.Id);
-        gl.EnableVertexAttribArray(modelShader.InPos);
-        gl.EnableVertexAttribArray(modelShader.InUV);
+        modelShader.Use();
 
         gl.SetUniform(modelShader.UniMVP, plane.Model * orthographic);
         gl.SetUniform(modelShader.UniTex, 0);
@@ -179,39 +180,23 @@ public unsafe class Game : IDisposable
         gl.BindTexture(GLEnum.Texture2D, skiaTex.Id);
 
         plane.Draw(modelShader);
+
+        modelShader.Unuse();
     }
 
     private void DrawGL()
     {
-        {
-            gl.BindFramebuffer(FramebufferTarget.Framebuffer, demoFrame1.Id);
-            gl.Viewport(0, 0, (uint)demoFrame1.Width, (uint)demoFrame1.Height);
-            demoCamera.Width = demoFrame1.Width;
-            demoCamera.Height = demoFrame1.Height;
-
-            demoFrame1.Demo(modelShader, demoCamera);
-        }
-
-        {
-            gl.BindFramebuffer(FramebufferTarget.Framebuffer, demoFrame2.Id);
-            gl.Viewport(0, 0, (uint)demoFrame2.Width, (uint)demoFrame2.Height);
-            demoCamera.Width = demoFrame2.Width;
-            demoCamera.Height = demoFrame2.Height;
-
-            demoFrame2.Demo(modelShader, demoCamera);
-        }
-
-        demoCamera.Height = Height;
-        demoCamera.Width = Width;
-        gl.Viewport(0, 0, (uint)Width, (uint)Height);
-        gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        demoFrame1.Demo(modelShader, demoCamera);
+        demoFrame2.Demo(modelShader, demoCamera);
     }
 
     private void DrawSkia()
     {
         skiaFrame.Demo1();
+
         skiaFrame.DrawFrame(demoFrame1, 10.0f, 10.0f, 1.0f, 1.0f);
         skiaFrame.DrawFrame(demoFrame2, Width - demoFrame2.Width, Height - demoFrame2.Height, 1.0f, 1.0f);
+
         skiaFrame.Demo2();
     }
 

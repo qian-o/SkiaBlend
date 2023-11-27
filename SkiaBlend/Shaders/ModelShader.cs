@@ -32,6 +32,22 @@ public class ModelShader : IDisposable
         UniTex = _gl.GetUniformLocation(Id, "u_Tex");
     }
 
+    public void Use()
+    {
+        _gl.UseProgram(Id);
+
+        _gl.EnableVertexAttribArray(InPos);
+        _gl.EnableVertexAttribArray(InUV);
+    }
+
+    public void Unuse()
+    {
+        _gl.DisableVertexAttribArray(InPos);
+        _gl.DisableVertexAttribArray(InUV);
+
+        _gl.UseProgram(0);
+    }
+
     public void Dispose()
     {
         _gl.DeleteProgram(Id);
