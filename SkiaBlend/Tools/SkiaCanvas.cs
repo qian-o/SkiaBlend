@@ -16,7 +16,15 @@ public class SkiaCanvas : Canvas
     {
         _fbo = fbo;
 
-        Context = GRContext.CreateGl(GRGlInterface.Create());
+        Context = GRContext.CreateGl(GRGlInterface.CreateGles(proc =>
+        {
+            if (gl.Context.TryGetProcAddress(proc, out nint addr))
+            {
+                return addr;
+            }
+
+            return 0;
+        }));
 
         Resize(size);
     }
@@ -67,6 +75,8 @@ public class SkiaCanvas : Canvas
 
         _gl.ClearColor(clearColor);
         _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
+
+        Context.ResetContext();
     }
 
     public void End()
@@ -77,7 +87,6 @@ public class SkiaCanvas : Canvas
         }
 
         Context.Flush();
-        Context.ResetContext();
 
         _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
     }
