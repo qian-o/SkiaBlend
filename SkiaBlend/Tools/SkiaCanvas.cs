@@ -33,6 +33,34 @@ public class SkiaCanvas : Canvas
 
     public SKSurface Surface { get; private set; } = null!;
 
+    public override void Begin(Color clearColor)
+    {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        _gl.BindFramebuffer(GLEnum.Framebuffer, _fbo);
+        _gl.Viewport(0, 0, Width, Height);
+
+        _gl.ClearColor(clearColor);
+        _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
+
+        Context.ResetContext();
+    }
+
+    public override void End()
+    {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        Context.Flush();
+
+        _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
+    }
+
     public override void DrawCanvas(Canvas canvas, Vector2D<float> offset, Vector2D<float> scale)
     {
         if (!IsReady || !canvas.IsReady)
@@ -56,39 +84,6 @@ public class SkiaCanvas : Canvas
         }
 
         Surface.Canvas.ResetMatrix();
-    }
-
-    public void Begin()
-    {
-        Begin(Color.White);
-    }
-
-    public void Begin(Color clearColor)
-    {
-        if (!IsReady)
-        {
-            return;
-        }
-
-        _gl.BindFramebuffer(GLEnum.Framebuffer, _fbo);
-        _gl.Viewport(0, 0, Width, Height);
-
-        _gl.ClearColor(clearColor);
-        _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
-
-        Context.ResetContext();
-    }
-
-    public void End()
-    {
-        if (!IsReady)
-        {
-            return;
-        }
-
-        Context.Flush();
-
-        _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
     }
 
     public void Demo1()

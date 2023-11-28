@@ -146,8 +146,6 @@ public unsafe class Game : IDisposable
         DrawGL();
         DrawSkia();
 
-        gl.Enable(EnableCap.Multisample);
-
         imGuiController.Update((float)obj);
 
         ImGui.Begin("Info");
@@ -166,8 +164,13 @@ public unsafe class Game : IDisposable
 
     private void DrawGL()
     {
+        subCanvas1.Begin(Color.Orange);
         subCanvas1.Demo(camera);
+        subCanvas1.End();
+
+        subCanvas2.Begin(Color.Green);
         subCanvas2.Demo(camera);
+        subCanvas2.End();
     }
 
     private void DrawSkia()
@@ -175,10 +178,8 @@ public unsafe class Game : IDisposable
         mainCanvas.Begin(Color.White);
 
         mainCanvas.Demo1();
-
         mainCanvas.DrawCanvas(subCanvas1, new Vector2D<float>(10.0f, 10.0f), Vector2D<float>.One);
         mainCanvas.DrawCanvas(subCanvas2, new Vector2D<float>(Width - subCanvas2.Width, Height - subCanvas2.Height), Vector2D<float>.One);
-
         mainCanvas.Demo2();
 
         mainCanvas.End();

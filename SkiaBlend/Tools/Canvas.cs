@@ -1,6 +1,7 @@
 ﻿using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
 using SkiaSharp;
+using System.Drawing;
 
 namespace SkiaBlend.Tools;
 
@@ -47,6 +48,12 @@ public abstract class Canvas : IDisposable
         Height = size.Y;
         IsReady = Initialization();
     }
+
+    public void Begin() => Begin(Color.White);
+
+    public abstract void Begin(Color clearColor);
+
+    public abstract void End();
 
     public abstract void DrawCanvas(Canvas canvas, Vector2D<float> offset, Vector2D<float> scale);
 

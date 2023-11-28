@@ -51,6 +51,28 @@ public unsafe class GLCanvas : Canvas
 
     public SKImage Image { get; private set; } = null!;
 
+    public override void Begin(Color clearColor)
+    {
+        _gl.Enable(EnableCap.Multisample);
+
+        _gl.Enable(GLEnum.DepthTest);
+        _gl.DepthFunc(GLEnum.Less);
+        _gl.DepthMask(true);
+
+        _gl.Enable(GLEnum.StencilTest);
+
+        _gl.BindFramebuffer(GLEnum.Framebuffer, Id);
+        _gl.Viewport(0, 0, Width, Height);
+
+        _gl.ClearColor(clearColor);
+        _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
+    }
+
+    public override void End()
+    {
+        _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
+    }
+
     public override void DrawCanvas(Canvas canvas, Vector2D<float> offset, Vector2D<float> scale)
     {
 
@@ -58,15 +80,8 @@ public unsafe class GLCanvas : Canvas
 
     public void Demo(Camera camera)
     {
-        _gl.BindFramebuffer(GLEnum.Framebuffer, Id);
-        _gl.Viewport(0, 0, Width, Height);
-
         camera.Width = (int)Width;
         camera.Height = (int)Height;
-
-        _gl.ClearColor(Color.Black);
-
-        _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
 
         _modelShader.Use();
 
@@ -79,8 +94,6 @@ public unsafe class GLCanvas : Canvas
         _plane.Draw(_modelShader);
 
         _modelShader.Unuse();
-
-        _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
     }
 
     protected override bool Initialization()
