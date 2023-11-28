@@ -4,7 +4,6 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
 using Silk.NET.OpenGLES.Extensions.ImGui;
 using Silk.NET.Windowing;
-using SkiaBlend.Shaders;
 using SkiaBlend.Tools;
 using System.Drawing;
 
@@ -18,13 +17,11 @@ public unsafe class Game : IDisposable
     private IInputContext inputContext = null!;
     private ImGuiController imGuiController = null!;
 
-    private SkiaFrame skiaFrame = null!;
+    private SkiaCanvas mainCanvas = null!;
 
-    private GLFrame demoFrame1 = null!;
-    private GLFrame demoFrame2 = null!;
-    private Camera demoCamera = null!;
-
-    private ModelShader modelShader = null!;
+    private GLCanvas subCanvas1 = null!;
+    private GLCanvas subCanvas2 = null!;
+    private Camera camera = null!;
 
     #region Input
     private IMouse mouse = null!;
@@ -62,16 +59,14 @@ public unsafe class Game : IDisposable
     private void Window_Load()
     {
         imGuiController = new ImGuiController(gl = _window.CreateOpenGLES(), _window, inputContext = _window.CreateInput());
-        demoCamera = new Camera
+        camera = new Camera
         {
             Position = new Vector3D<float>(0.0f, 2.0f, 8.0f),
             Fov = 45.0f
         };
-        skiaFrame = new SkiaFrame(gl, Width, Height);
-        demoFrame1 = new GLFrame(gl, _window.Samples, 400, 400);
-        demoFrame2 = new GLFrame(gl, _window.Samples, 400, 200);
-
-        modelShader = new ModelShader(gl);
+        mainCanvas = new SkiaCanvas(gl, _window.Size, 0);
+        subCanvas1 = new GLCanvas(gl, new Vector2D<int>(400, 400), _window.Samples, mainCanvas);
+        subCanvas2 = new GLCanvas(gl, new Vector2D<int>(400, 200), _window.Samples, mainCanvas);
 
         mouse = inputContext.Mice[0];
         keyboard = inputContext.Keyboards[0];
@@ -80,11 +75,7 @@ public unsafe class Game : IDisposable
     private void Window_Resize(Vector2D<int> obj)
     {
         gl.Viewport(obj);
-
-        if (obj.X > 0 && obj.Y > 0)
-        {
-            skiaFrame.Resize(obj.X, obj.Y);
-        }
+        mainCanvas.Resize(obj);
     }
 
     private void Window_Update(double obj)
@@ -104,8 +95,8 @@ public unsafe class Game : IDisposable
                 float deltaX = vector.X - lastPos.X;
                 float deltaY = vector.Y - lastPos.Y;
 
-                demoCamera.Yaw += deltaX * 0.2f;
-                demoCamera.Pitch += -deltaY * 0.2f;
+                camera.Yaw += deltaX * 0.2f;
+                camera.Pitch += -deltaY * 0.2f;
 
                 lastPos = vector;
             }
@@ -117,36 +108,36 @@ public unsafe class Game : IDisposable
 
         if (keyboard.IsKeyPressed(Key.W))
         {
-            demoCamera.Position += demoCamera.Front * 4.0f * (float)obj;
+            camera.Position += camera.Front * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.A))
         {
-            demoCamera.Position -= demoCamera.Right * 4.0f * (float)obj;
+            camera.Position -= camera.Right * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.S))
         {
-            demoCamera.Position -= demoCamera.Front * 4.0f * (float)obj;
+            camera.Position -= camera.Front * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.D))
         {
-            demoCamera.Position += demoCamera.Right * 4.0f * (float)obj;
+            camera.Position += camera.Right * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.Q))
         {
-            demoCamera.Position -= demoCamera.Up * 4.0f * (float)obj;
+            camera.Position -= camera.Up * 4.0f * (float)obj;
         }
 
         if (keyboard.IsKeyPressed(Key.E))
         {
-            demoCamera.Position += demoCamera.Up * 4.0f * (float)obj;
+            camera.Position += camera.Up * 4.0f * (float)obj;
         }
 
-        demoCamera.Width = Width;
-        demoCamera.Height = Height;
+        camera.Width = Width;
+        camera.Height = Height;
     }
 
     private void Window_Render(double obj)
@@ -165,31 +156,29 @@ public unsafe class Game : IDisposable
 
     private void DrawGL()
     {
-        // 此处不使用Begin、End包裹，因为GLFrame中直接使用了GL的方法。
-        demoFrame1.Demo(modelShader, demoCamera);
-        demoFrame2.Demo(modelShader, demoCamera);
+        subCanvas1.Demo(camera);
+        subCanvas2.Demo(camera);
     }
 
     private void DrawSkia()
     {
-        // 使用Begin、End包裹，可以将将Skia内容提交到GL中进行绘制。
-        skiaFrame.Begin(Color.White);
+        mainCanvas.Begin(Color.White);
 
-        skiaFrame.Demo1();
+        mainCanvas.Demo1();
 
-        skiaFrame.DrawFrame(demoFrame1, 10.0f, 10.0f, 1.0f, 1.0f);
-        skiaFrame.DrawFrame(demoFrame2, Width - demoFrame2.Width, Height - demoFrame2.Height, 1.0f, 1.0f);
+        mainCanvas.DrawCanvas(subCanvas1, new Vector2D<float>(10.0f, 10.0f), Vector2D<float>.One);
+        mainCanvas.DrawCanvas(subCanvas2, new Vector2D<float>(Width - subCanvas2.Width, Height - subCanvas2.Height), Vector2D<float>.One);
 
-        skiaFrame.Demo2();
+        mainCanvas.Demo2();
 
-        skiaFrame.End();
+        mainCanvas.End();
     }
 
     public void Dispose()
     {
-        demoFrame1.Dispose();
-        demoFrame2.Dispose();
-        skiaFrame.Dispose();
+        subCanvas2.Dispose();
+        subCanvas1.Dispose();
+        mainCanvas.Dispose();
 
         GC.SuppressFinalize(this);
     }
