@@ -9,6 +9,7 @@ public abstract class Canvas : IDisposable
     protected readonly GL _gl;
     protected readonly GLEnum _glColor;
     protected readonly GLEnum _glColorType;
+    protected readonly GLEnum _glColorAndType;
     protected readonly SKColorType _skColorAndType;
 
     protected Canvas(GL gl)
@@ -16,18 +17,19 @@ public abstract class Canvas : IDisposable
         _gl = gl;
         _glColor = GLEnum.Rgba;
         _glColorType = GLEnum.UnsignedByte;
+        _glColorAndType = GLEnum.Rgba8;
         _skColorAndType = SKColorType.Rgba8888;
     }
 
-    public int Width { get; private set; }
+    public uint Width { get; private set; }
 
-    public int Height { get; private set; }
+    public uint Height { get; private set; }
 
     public bool IsReady { get; private set; }
 
     public bool IsDisposed { get; private set; }
 
-    public void Resize(Vector2D<int> size)
+    public void Resize(Vector2D<uint> size)
     {
         if (size.X == 0 || size.Y == 0)
         {

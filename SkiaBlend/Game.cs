@@ -64,9 +64,9 @@ public unsafe class Game : IDisposable
             Position = new Vector3D<float>(0.0f, 2.0f, 8.0f),
             Fov = 45.0f
         };
-        mainCanvas = new SkiaCanvas(gl, _window.Size, 0);
-        subCanvas1 = new GLCanvas(gl, new Vector2D<int>(400, 400), _window.Samples, mainCanvas);
-        subCanvas2 = new GLCanvas(gl, new Vector2D<int>(400, 200), _window.Samples, mainCanvas);
+        mainCanvas = new SkiaCanvas(gl, new Vector2D<uint>((uint)Width, (uint)Height), 0);
+        subCanvas1 = new GLCanvas(gl, new Vector2D<uint>(400, 400), _window.Samples, mainCanvas);
+        subCanvas2 = new GLCanvas(gl, new Vector2D<uint>(400, 200), _window.Samples, mainCanvas);
 
         mouse = inputContext.Mice[0];
         keyboard = inputContext.Keyboards[0];
@@ -75,7 +75,7 @@ public unsafe class Game : IDisposable
     private void Window_Resize(Vector2D<int> obj)
     {
         gl.Viewport(obj);
-        mainCanvas.Resize(obj);
+        mainCanvas.Resize(new Vector2D<uint>((uint)obj.X, (uint)obj.Y));
     }
 
     private void Window_Update(double obj)
@@ -157,7 +157,10 @@ public unsafe class Game : IDisposable
     private void DrawGL()
     {
         subCanvas1.Demo(camera);
+        subCanvas1.Present();
+
         subCanvas2.Demo(camera);
+        subCanvas2.Present();
     }
 
     private void DrawSkia()

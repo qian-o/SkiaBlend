@@ -12,7 +12,7 @@ public class SkiaCanvas : Canvas
 
     private GRBackendRenderTarget renderTarget = null!;
 
-    public SkiaCanvas(GL gl, Vector2D<int> size, uint fbo) : base(gl)
+    public SkiaCanvas(GL gl, Vector2D<uint> size, uint fbo) : base(gl)
     {
         _fbo = fbo;
 
@@ -63,7 +63,7 @@ public class SkiaCanvas : Canvas
         }
 
         _gl.BindFramebuffer(GLEnum.Framebuffer, _fbo);
-        _gl.Viewport(0, 0, (uint)Width, (uint)Height);
+        _gl.Viewport(0, 0, Width, Height);
 
         _gl.ClearColor(clearColor);
         _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
@@ -116,7 +116,7 @@ public class SkiaCanvas : Canvas
         {
             samples = maxSamples;
         }
-        renderTarget = new GRBackendRenderTarget(Width, Height, samples, stencil, new GRGlFramebufferInfo(_fbo, _skColorAndType.ToGlSizedFormat()));
+        renderTarget = new GRBackendRenderTarget((int)Width, (int)Height, samples, stencil, new GRGlFramebufferInfo(_fbo, _skColorAndType.ToGlSizedFormat()));
         Surface = SKSurface.Create(Context, renderTarget, GRSurfaceOrigin.BottomLeft, _skColorAndType);
 
         return true;
