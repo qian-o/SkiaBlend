@@ -49,6 +49,7 @@ public unsafe class Game : IDisposable
         _window.FramebufferResize += Window_Resize;
         _window.Update += Window_Update;
         _window.Render += Window_Render;
+        _window.Closing += Window_Closing;
     }
 
     public void Run()
@@ -154,6 +155,13 @@ public unsafe class Game : IDisposable
         imGuiController.Render();
     }
 
+    private void Window_Closing()
+    {
+        subCanvas2.Dispose();
+        subCanvas1.Dispose();
+        mainCanvas.Dispose();
+    }
+
     private void DrawGL()
     {
         subCanvas1.Demo(camera);
@@ -176,9 +184,11 @@ public unsafe class Game : IDisposable
 
     public void Dispose()
     {
-        subCanvas2.Dispose();
-        subCanvas1.Dispose();
-        mainCanvas.Dispose();
+        imGuiController.Dispose();
+        inputContext.Dispose();
+        gl.Dispose();
+
+        _window.Dispose();
 
         GC.SuppressFinalize(this);
     }
