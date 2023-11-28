@@ -146,6 +146,8 @@ public unsafe class Game : IDisposable
         DrawGL();
         DrawSkia();
 
+        gl.Enable(EnableCap.Multisample);
+
         imGuiController.Update((float)obj);
 
         ImGui.Begin("Info");
