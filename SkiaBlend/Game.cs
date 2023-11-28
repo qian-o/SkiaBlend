@@ -66,7 +66,7 @@ public unsafe class Game : IDisposable
             Fov = 45.0f
         };
         mainCanvas = new SkiaCanvas(gl, new Vector2D<uint>((uint)Width, (uint)Height), 0);
-        subCanvas1 = new GLCanvas(gl, new Vector2D<uint>(400, 400), _window.Samples, mainCanvas);
+        subCanvas1 = new GLCanvas(gl, new Vector2D<uint>(600, 400), _window.Samples, mainCanvas);
         subCanvas2 = new GLCanvas(gl, new Vector2D<uint>(400, 200), _window.Samples, mainCanvas);
 
         mouse = inputContext.Mice[0];
