@@ -44,7 +44,7 @@ public class SkiaCanvas : Canvas
         }
         else if (canvas is GLCanvas gLCanvas)
         {
-            Surface.Canvas.DrawImage(gLCanvas.SKImage, new SKPoint(0, 0), PaintHelper.GetPaint(PaintParameter.Default));
+            Surface.Canvas.DrawImage(gLCanvas.Image, new SKPoint(0, 0), PaintHelper.GetPaint(PaintParameter.Default));
         }
 
         Surface.Canvas.ResetMatrix();

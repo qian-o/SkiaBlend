@@ -49,7 +49,7 @@ public unsafe class GLCanvas : Canvas
 
     public uint DepthRenderBuffer { get; }
 
-    public SKImage SKImage { get; private set; } = null!;
+    public SKImage Image { get; private set; } = null!;
 
     public override void DrawCanvas(Canvas canvas, Vector2D<float> offset, Vector2D<float> scale)
     {
@@ -113,14 +113,14 @@ public unsafe class GLCanvas : Canvas
         _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
 
         backendTexture = new((int)Width, (int)Height, true, new GRGlTextureInfo((uint)GLEnum.Texture2D, ColorBuffer, _skFormatAndType.ToGlSizedFormat()));
-        SKImage = SKImage.FromAdoptedTexture(_skiaCanvas.Context, backendTexture, GRSurfaceOrigin.BottomLeft, _skFormatAndType); ;
+        Image = SKImage.FromTexture(_skiaCanvas.Context, backendTexture, GRSurfaceOrigin.BottomLeft, _skFormatAndType);
 
         return true;
     }
 
     protected override void Destroy()
     {
-        SKImage?.Dispose();
+        Image?.Dispose();
         backendTexture?.Dispose();
     }
 }
