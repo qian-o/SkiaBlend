@@ -10,7 +10,7 @@ public class SkiaCanvas : Canvas
 {
     private readonly uint _fbo;
 
-    private GRBackendRenderTarget renderTarget = null!;
+    private GRBackendRenderTarget backendRenderTarget = null!;
 
     public SkiaCanvas(GL gl, Vector2D<uint> size, uint fbo) : base(gl)
     {
@@ -111,13 +111,14 @@ public class SkiaCanvas : Canvas
         _gl.GetInteger(GLEnum.Stencil, out int stencil);
         _gl.GetInteger(GLEnum.Samples, out int samples);
 
-        int maxSamples = Context.GetMaxSurfaceSampleCount(_skColorAndType);
+        int maxSamples = Context.GetMaxSurfaceSampleCount(_skFormatAndType);
         if (samples > maxSamples)
         {
             samples = maxSamples;
         }
-        renderTarget = new GRBackendRenderTarget((int)Width, (int)Height, samples, stencil, new GRGlFramebufferInfo(_fbo, _skColorAndType.ToGlSizedFormat()));
-        Surface = SKSurface.Create(Context, renderTarget, GRSurfaceOrigin.BottomLeft, _skColorAndType);
+
+        backendRenderTarget = new((int)Width, (int)Height, samples, stencil, new GRGlFramebufferInfo(_fbo, _skFormatAndType.ToGlSizedFormat()));
+        Surface = SKSurface.Create(Context, backendRenderTarget, GRSurfaceOrigin.BottomLeft, _skFormatAndType);
 
         return true;
     }
@@ -125,7 +126,7 @@ public class SkiaCanvas : Canvas
     protected override void Destroy()
     {
         Surface?.Dispose();
-        renderTarget?.Dispose();
+        backendRenderTarget?.Dispose();
 
         if (IsDisposed)
         {

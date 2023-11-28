@@ -7,18 +7,18 @@ namespace SkiaBlend.Tools;
 public abstract class Canvas : IDisposable
 {
     protected readonly GL _gl;
-    protected readonly GLEnum _glColor;
-    protected readonly GLEnum _glColorType;
-    protected readonly GLEnum _glColorAndType;
-    protected readonly SKColorType _skColorAndType;
+    protected readonly GLEnum _glFormat;
+    protected readonly GLEnum _glType;
+    protected readonly GLEnum _glFormatAndType;
+    protected readonly SKColorType _skFormatAndType;
 
     protected Canvas(GL gl)
     {
         _gl = gl;
-        _glColor = GLEnum.Rgba;
-        _glColorType = GLEnum.UnsignedByte;
-        _glColorAndType = GLEnum.Rgba8;
-        _skColorAndType = SKColorType.Rgba8888;
+        _glFormat = GLEnum.Rgba;
+        _glType = GLEnum.UnsignedByte;
+        _glFormatAndType = GLEnum.Rgba8;
+        _skFormatAndType = SKColorType.Rgba8888;
     }
 
     public uint Width { get; private set; }

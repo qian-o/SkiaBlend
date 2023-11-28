@@ -157,10 +157,7 @@ public unsafe class Game : IDisposable
     private void DrawGL()
     {
         subCanvas1.Demo(camera);
-        subCanvas1.Present();
-
         subCanvas2.Demo(camera);
-        subCanvas2.Present();
     }
 
     private void DrawSkia()
