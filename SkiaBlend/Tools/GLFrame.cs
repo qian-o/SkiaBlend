@@ -54,7 +54,7 @@ public unsafe class GLFrame : Frame
         // 绑定纹理、渲染缓冲区、帧缓冲区。
         // 尝试使用扩展创建绑定多重采样纹理。
         _gl.BindTexture(GLEnum.Texture2D, ColorBuffer);
-        _gl.TexImage2D(GLEnum.Texture2D, 0, (int)GLEnum.Rgb, (uint)w, (uint)h, 0, GLEnum.Rgb, GLEnum.UnsignedByte, null);
+        _gl.TexImage2D(GLEnum.Texture2D, 0, (int)GLEnum.Rgba, (uint)w, (uint)h, 0, GLEnum.Rgba, GLEnum.UnsignedByte, null);
         _gl.BindTexture(GLEnum.Texture2D, 0);
 
         _gl.BindRenderbuffer(GLEnum.Renderbuffer, DepthRenderBuffer);
@@ -83,7 +83,7 @@ public unsafe class GLFrame : Frame
         base.Resize(w, h);
 
         // 使用颜色缓冲区创建 SKImage。
-        sKImage = SKImage.FromTexture(surface.Context, new GRBackendTexture(w, h, false, new GRGlTextureInfo(0x0DE1, ColorBuffer, _colorType.ToGlSizedFormat())), GRSurfaceOrigin.BottomLeft, _colorType);
+        sKImage = SKImage.FromTexture(surface.Context, new GRBackendTexture(w, h, false, new GRGlTextureInfo((uint)GLEnum.Texture2D, ColorBuffer, _colorType.ToGlSizedFormat())), GRSurfaceOrigin.BottomLeft, _colorType);
     }
 
     public void Demo(ModelShader modelShader, Camera camera)
