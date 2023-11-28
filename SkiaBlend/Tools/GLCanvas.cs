@@ -122,5 +122,18 @@ public unsafe class GLCanvas : Canvas
     {
         Image?.Dispose();
         backendTexture?.Dispose();
+
+        if (IsDisposed)
+        {
+            _linearColor.Dispose();
+            _plane.Dispose();
+            _modelShader.Dispose();
+
+            _gl.DeleteFramebuffer(Id);
+            _gl.DeleteTexture(ColorBuffer);
+            _gl.DeleteRenderbuffer(DepthRenderBuffer);
+
+            _extMRT.Dispose();
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace SkiaBlend.Tools;
 
-public unsafe class Plane
+public unsafe class Plane : IDisposable
 {
     private readonly GL _gl;
     private readonly Vertex[] _vertices;
@@ -30,10 +30,10 @@ public unsafe class Plane
         _vertices =
         [
             new Vertex(new Vector3D<float>(-0.5f, 0.0f, -0.5f), new Vector2D<float>(0.0f, 1.0f)),
-            new Vertex(new Vector3D<float>( 0.5f, 0.0f, -0.5f), new Vector2D<float>(1.0f, 1.0f)),
-            new Vertex(new Vector3D<float>( 0.5f, 0.0f,  0.5f), new Vector2D<float>(1.0f, 0.0f)),
-            new Vertex(new Vector3D<float>( 0.5f, 0.0f,  0.5f), new Vector2D<float>(1.0f, 0.0f)),
-            new Vertex(new Vector3D<float>(-0.5f, 0.0f,  0.5f), new Vector2D<float>(0.0f, 0.0f)),
+            new Vertex(new Vector3D<float>(0.5f, 0.0f, -0.5f), new Vector2D<float>(1.0f, 1.0f)),
+            new Vertex(new Vector3D<float>(0.5f, 0.0f, 0.5f), new Vector2D<float>(1.0f, 0.0f)),
+            new Vertex(new Vector3D<float>(0.5f, 0.0f, 0.5f), new Vector2D<float>(1.0f, 0.0f)),
+            new Vertex(new Vector3D<float>(-0.5f, 0.0f, 0.5f), new Vector2D<float>(0.0f, 0.0f)),
             new Vertex(new Vector3D<float>(-0.5f, 0.0f, -0.5f), new Vector2D<float>(0.0f, 1.0f))
         ];
 
@@ -61,5 +61,13 @@ public unsafe class Plane
         _gl.BindBuffer(GLEnum.ElementArrayBuffer, EBO);
         _gl.DrawElements(GLEnum.Triangles, (uint)Indices.Length, GLEnum.UnsignedInt, (void*)0);
         _gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
+    }
+
+    public void Dispose()
+    {
+        _gl.DeleteBuffer(VBO);
+        _gl.DeleteBuffer(EBO);
+
+        GC.SuppressFinalize(this);
     }
 }
