@@ -46,7 +46,7 @@ public unsafe class Game : IDisposable
 
         _window = Window.Create(windowOptions);
         _window.Load += Window_Load;
-        _window.FramebufferResize += Window_Resize;
+        _window.FramebufferResize += Window_FramebufferResize;
         _window.Update += Window_Update;
         _window.Render += Window_Render;
         _window.Closing += Window_Closing;
@@ -73,10 +73,14 @@ public unsafe class Game : IDisposable
         keyboard = inputContext.Keyboards[0];
     }
 
-    private void Window_Resize(Vector2D<int> obj)
+    private void Window_FramebufferResize(Vector2D<int> obj)
     {
         gl.Viewport(obj);
         mainCanvas.Resize(new Vector2D<uint>((uint)obj.X, (uint)obj.Y));
+        subCanvas1.Resize(new Vector2D<uint>(Convert.ToUInt32(obj.X * 0.5), Convert.ToUInt32(obj.Y * 0.5)));
+        subCanvas2.Resize(new Vector2D<uint>(Convert.ToUInt32(obj.X * 0.3), Convert.ToUInt32(obj.Y * 0.3)));
+
+        _window.DoRender();
     }
 
     private void Window_Update(double obj)
@@ -164,11 +168,11 @@ public unsafe class Game : IDisposable
 
     private void DrawGL()
     {
-        subCanvas1.Begin(Color.Orange);
+        subCanvas1.Begin(Color.FromArgb(127, 0, 0, 127));
         subCanvas1.Demo(camera);
         subCanvas1.End();
 
-        subCanvas2.Begin(Color.Green);
+        subCanvas2.Begin(Color.FromArgb(127, 0, 127, 127));
         subCanvas2.Demo(camera);
         subCanvas2.End();
     }
@@ -179,7 +183,7 @@ public unsafe class Game : IDisposable
 
         mainCanvas.Demo1();
         mainCanvas.DrawCanvas(subCanvas1, new Vector2D<float>(10.0f, 10.0f), Vector2D<float>.One);
-        mainCanvas.DrawCanvas(subCanvas2, new Vector2D<float>(Width - subCanvas2.Width, Height - subCanvas2.Height), Vector2D<float>.One);
+        mainCanvas.DrawCanvas(subCanvas2, new Vector2D<float>(Width - subCanvas2.Width - 10, Height - subCanvas2.Height - 10), Vector2D<float>.One);
         mainCanvas.Demo2();
 
         mainCanvas.End();

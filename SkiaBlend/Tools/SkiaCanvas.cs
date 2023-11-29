@@ -76,11 +76,11 @@ public class SkiaCanvas : Canvas
 
         if (canvas is SkiaCanvas skiaCanvas)
         {
-            Surface.Canvas.DrawSurface(skiaCanvas.Surface, new SKPoint(0, 0), PaintHelper.GetPaint(PaintParameter.Default));
+            Surface.Canvas.DrawSurface(skiaCanvas.Surface, new SKPoint(0, 0), PaintHelper.GetPaint());
         }
         else if (canvas is GLCanvas gLCanvas)
         {
-            Surface.Canvas.DrawImage(gLCanvas.Image, new SKPoint(0, 0), PaintHelper.GetPaint(PaintParameter.Default));
+            Surface.Canvas.DrawImage(gLCanvas.Image, new SKPoint(0, 0), PaintHelper.GetPaint());
         }
 
         Surface.Canvas.ResetMatrix();
@@ -93,9 +93,16 @@ public class SkiaCanvas : Canvas
             return;
         }
 
-        Surface.Canvas.DrawCircle(Width / 2, Height / 2, 100, PaintHelper.GetPaint(PaintParameter.Red));
-        Surface.Canvas.DrawCircle(Width / 2 + 100, Height / 2, 100, PaintHelper.GetPaint(PaintParameter.Green));
-        Surface.Canvas.DrawCircle(Width / 2 + 200, Height / 2, 100, PaintHelper.GetPaint(PaintParameter.Blue));
+        SKPaint paint = PaintHelper.GetPaint();
+
+        paint.Color = SKColors.Red;
+        Surface.Canvas.DrawCircle(Width / 2, Height / 2, 100, paint);
+
+        paint.Color = SKColors.Green;
+        Surface.Canvas.DrawCircle(Width / 2 + 100, Height / 2, 100, paint);
+
+        paint.Color = SKColors.Blue;
+        Surface.Canvas.DrawCircle(Width / 2 + 200, Height / 2, 100, paint);
     }
 
     public void Demo2()
@@ -105,9 +112,12 @@ public class SkiaCanvas : Canvas
             return;
         }
 
-        PaintParameter paintParameter = new(SKColors.Red, 50, SKTextAlign.Center, SKPaintStyle.Fill);
+        SKPaint paint = PaintHelper.GetPaint();
+        paint.Color = SKColors.Red;
+        paint.TextSize = 50;
+        paint.TextAlign = SKTextAlign.Center;
 
-        Surface.Canvas.DrawText("Hello World!", 150, 50, PaintHelper.GetPaint(paintParameter));
+        Surface.Canvas.DrawText("Hello World!", 150, 50, paint);
     }
 
     protected override bool Initialization()
