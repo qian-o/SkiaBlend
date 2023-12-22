@@ -122,7 +122,7 @@ public class SkiaCanvas : Canvas
 
     protected override bool Initialization()
     {
-        _gl.GetInteger(GLEnum.Stencil, out int stencil);
+        _gl.GetInteger(GLEnum.StencilBits, out int stencil);
         _gl.GetInteger(GLEnum.Samples, out int samples);
 
         int maxSamples = Context.GetMaxSurfaceSampleCount(_skFormatAndType);

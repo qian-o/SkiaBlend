@@ -1,4 +1,7 @@
 ﻿using ImGuiNET;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
@@ -18,6 +21,8 @@ public unsafe class Game : IDisposable
     private ImGuiController imGuiController = null!;
 
     private SkiaCanvas mainCanvas = null!;
+    private OxyPlotController oxyPlotController = null!;
+    private PlotModel plotModel = null!;
 
     private GLCanvas subCanvas1 = null!;
     private GLCanvas subCanvas2 = null!;
@@ -41,7 +46,7 @@ public unsafe class Game : IDisposable
         windowOptions.Samples = 8;
         windowOptions.VSync = false;
         windowOptions.PreferredDepthBufferBits = 32;
-        windowOptions.PreferredStencilBufferBits = 32;
+        windowOptions.PreferredStencilBufferBits = 8;
         windowOptions.PreferredBitDepth = new Vector4D<int>(8);
 
         _window = Window.Create(windowOptions);
@@ -66,6 +71,50 @@ public unsafe class Game : IDisposable
             Fov = 45.0f
         };
         mainCanvas = new SkiaCanvas(gl, new Vector2D<uint>((uint)Width, (uint)Height), 0);
+        oxyPlotController = new OxyPlotController(mainCanvas, inputContext);
+        plotModel = oxyPlotController.ActualModel;
+
+        {
+            Random random = new();
+
+            string xKey = Guid.NewGuid().ToString();
+            string yKey = Guid.NewGuid().ToString();
+
+            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "X", Key = xKey });
+            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Y", Key = yKey });
+
+            LineSeries lineSeries = new()
+            {
+                Title = "LineSeries",
+                MarkerType = MarkerType.Circle,
+                MarkerSize = 4,
+                MarkerStroke = OxyColors.White,
+                MarkerFill = OxyColors.Green,
+                MarkerStrokeThickness = 1.5,
+                Color = OxyColors.SkyBlue,
+                StrokeThickness = 1.5
+            };
+
+            ScatterSeries scatterSeries = new()
+            {
+                Title = "ScatterSeries",
+                MarkerType = MarkerType.Circle,
+                MarkerSize = 4,
+                MarkerStroke = OxyColors.White,
+                MarkerFill = OxyColors.SkyBlue,
+                MarkerStrokeThickness = 1.5
+            };
+
+            for (int i = 0; i < 10000; i++)
+            {
+                lineSeries.Points.Add(new DataPoint(i, random.NextDouble()));
+                scatterSeries.Points.Add(new ScatterPoint(i, random.NextDouble()));
+            }
+
+            plotModel.Series.Add(lineSeries);
+            plotModel.Series.Add(scatterSeries);
+        }
+
         subCanvas1 = new GLCanvas(gl, new Vector2D<uint>(600, 400), _window.Samples, mainCanvas);
         subCanvas2 = new GLCanvas(gl, new Vector2D<uint>(400, 200), _window.Samples, mainCanvas);
 
@@ -150,8 +199,6 @@ public unsafe class Game : IDisposable
         DrawGL();
         DrawSkia();
 
-        imGuiController.Update((float)obj);
-
         ImGui.Begin("Info");
         ImGui.Value("FPS", ImGui.GetIO().Framerate);
         ImGui.End();
@@ -177,9 +224,18 @@ public unsafe class Game : IDisposable
         subCanvas2.End();
     }
 
+    private bool first = true;
+
     private void DrawSkia()
     {
         mainCanvas.Begin(Color.White);
+
+        plotModel.InvalidatePlot(first);
+
+        if (first)
+        {
+            first = false;
+        }
 
         mainCanvas.Demo1();
         mainCanvas.DrawCanvas(subCanvas1, new Vector2D<float>(10.0f, 10.0f), Vector2D<float>.One);
