@@ -60,9 +60,14 @@ public unsafe class GLCanvas : Canvas
         _gl.DepthMask(true);
 
         _gl.Enable(GLEnum.StencilTest);
+        _gl.StencilFunc(GLEnum.Always, 1, 0xFF);
+
+        _gl.Enable(GLEnum.Blend);
+        _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
 
         _gl.BindFramebuffer(GLEnum.Framebuffer, Id);
         _gl.Viewport(0, 0, Width, Height);
+        _gl.Scissor(0, 0, Width, Height);
 
         _gl.ClearColor(clearColor);
         _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
@@ -89,9 +94,12 @@ public unsafe class GLCanvas : Canvas
         _gl.SetUniform(_modelShader.UniTex, 0);
 
         _gl.ActiveTexture(GLEnum.Texture0);
+
         _gl.BindTexture(GLEnum.Texture2D, _linearColor.Id);
 
         _plane.Draw(_modelShader);
+
+        _gl.BindTexture(GLEnum.Texture2D, 0);
 
         _modelShader.Unuse();
     }

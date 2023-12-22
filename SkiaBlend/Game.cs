@@ -77,48 +77,9 @@ public unsafe class Game : IDisposable
 
         plotView = new PlotView(inputContext);
         {
-            PlotModel plotModel = plotView.ActualModel;
+            plotView.ActualModel = ColorMapHot16Big();
 
-            Random random = new();
-
-            string xKey = Guid.NewGuid().ToString();
-            string yKey = Guid.NewGuid().ToString();
-
-            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "X", Key = xKey });
-            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Y", Key = yKey });
-
-            LineSeries lineSeries = new()
-            {
-                Title = "LineSeries",
-                MarkerType = MarkerType.Circle,
-                MarkerSize = 4,
-                MarkerStroke = OxyColors.White,
-                MarkerFill = OxyColors.Green,
-                MarkerStrokeThickness = 1.5,
-                Color = OxyColors.SkyBlue,
-                StrokeThickness = 1.5
-            };
-
-            ScatterSeries scatterSeries = new()
-            {
-                Title = "ScatterSeries",
-                MarkerType = MarkerType.Circle,
-                MarkerSize = 4,
-                MarkerStroke = OxyColors.White,
-                MarkerFill = OxyColors.SkyBlue,
-                MarkerStrokeThickness = 1.5
-            };
-
-            for (int i = 0; i < 100; i++)
-            {
-                lineSeries.Points.Add(new DataPoint(i, random.NextDouble()));
-                scatterSeries.Points.Add(new ScatterPoint(i, random.NextDouble()));
-            }
-
-            plotModel.Series.Add(lineSeries);
-            plotModel.Series.Add(scatterSeries);
-
-            plotModel.InvalidatePlot(true);
+            plotView.ActualModel.InvalidatePlot(true);
         }
 
         mouse = inputContext.Mice[0];
@@ -233,12 +194,12 @@ public unsafe class Game : IDisposable
     {
         mainCanvas.Begin(Color.White);
 
+        plotView.Render(mainCanvas, new Vector2D<float>(0.0f, 0.0f), new Vector2D<float>(Width, Height));
+
         mainCanvas.Demo1();
         mainCanvas.DrawCanvas(subCanvas1, new Vector2D<float>(10.0f, 10.0f), Vector2D<float>.One);
         mainCanvas.DrawCanvas(subCanvas2, new Vector2D<float>(Width - subCanvas2.Width - 10, Height - subCanvas2.Height - 10), Vector2D<float>.One);
         mainCanvas.Demo2();
-
-        plotView.Render(mainCanvas, new Vector2D<float>(10.0f, 10.0f), new Vector2D<float>(500.0f, 500.0f));
 
         mainCanvas.End();
     }
@@ -252,5 +213,47 @@ public unsafe class Game : IDisposable
         _window.Dispose();
 
         GC.SuppressFinalize(this);
+    }
+
+    public static PlotModel ColorMapHot16Big()
+    {
+        return CreateRandomScatterSeriesWithColorAxisPlotModel(300000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
+    }
+
+    private static PlotModel CreateRandomScatterSeriesWithColorAxisPlotModel(int n, OxyPalette palette, MarkerType markerType, AxisPosition colorAxisPosition, OxyColor highColor, OxyColor lowColor)
+    {
+        var model = new PlotModel { Title = string.Format("ScatterSeries (n={0})", n), Background = OxyColors.LightGray };
+        var colorAxis = new LinearColorAxis { Position = colorAxisPosition, Palette = palette, Minimum = -1, Maximum = 1, HighColor = highColor, LowColor = lowColor };
+        model.Axes.Add(colorAxis);
+        model.Series.Add(CreateRandomScatterSeries(n, markerType, false, true, colorAxis));
+        return model;
+    }
+
+    private static ScatterSeries CreateRandomScatterSeries(int n, MarkerType markerType, bool setSize, bool setValue, LinearColorAxis colorAxis)
+    {
+        var s1 = new ScatterSeries
+        {
+            MarkerType = markerType,
+            MarkerSize = 6,
+            ColorAxisKey = colorAxis?.Key
+        };
+        var random = new Random(13);
+        for (int i = 0; i < n; i++)
+        {
+            var p = new ScatterPoint((random.NextDouble() * 2.2) - 1.1, random.NextDouble());
+            if (setSize)
+            {
+                p.Size = (random.NextDouble() * 5) + 5;
+            }
+
+            if (setValue)
+            {
+                p.Value = (random.NextDouble() * 2.2) - 1.1;
+            }
+
+            s1.Points.Add(p);
+        }
+
+        return s1;
     }
 }
