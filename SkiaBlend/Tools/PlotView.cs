@@ -25,9 +25,9 @@ public class PlotView : IPlotView
         _mouse.Scroll += Mouse_Scroll;
     }
 
-    private PlotModel actualModel = null!;
+    private PlotModel? actualModel;
 
-    public PlotModel ActualModel
+    public PlotModel? ActualModel
     {
         get => actualModel;
         set
@@ -44,6 +44,8 @@ public class PlotView : IPlotView
                 if (actualModel != null)
                 {
                     ((IPlotModel)actualModel).AttachPlotView(this);
+
+                    actualModel.InvalidatePlot(true);
                 }
             }
         }
@@ -53,7 +55,7 @@ public class PlotView : IPlotView
 
     public OxyRect ClientArea { get; set; }
 
-    Model IView.ActualModel => actualModel;
+    Model? IView.ActualModel => actualModel;
 
     public void HideTracker()
     {
@@ -66,6 +68,11 @@ public class PlotView : IPlotView
 
     public void InvalidatePlot(bool updateData = true)
     {
+        if (ActualModel == null)
+        {
+            return;
+        }
+
         ((IPlotModel)ActualModel).Update(updateData);
     }
 
@@ -87,6 +94,11 @@ public class PlotView : IPlotView
 
     public void Render(SkiaCanvas skiaCanvas, Vector2D<float> offset, Vector2D<float> size)
     {
+        if (ActualModel == null)
+        {
+            return;
+        }
+
         ClientArea = new OxyRect(offset.X, offset.Y, size.X, size.Y);
 
         _renderContext.SkCanvas = skiaCanvas.Surface.Canvas;

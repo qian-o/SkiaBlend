@@ -217,7 +217,7 @@ public unsafe class Game : IDisposable
 
     public static PlotModel ColorMapHot16Big()
     {
-        return CreateRandomScatterSeriesWithColorAxisPlotModel(300000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
+        return CreateRandomScatterSeriesWithColorAxisPlotModel(10000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
     }
 
     private static PlotModel CreateRandomScatterSeriesWithColorAxisPlotModel(int n, OxyPalette palette, MarkerType markerType, AxisPosition colorAxisPosition, OxyColor highColor, OxyColor lowColor)
