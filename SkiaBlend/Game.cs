@@ -217,13 +217,13 @@ public unsafe class Game : IDisposable
 
     public static PlotModel ColorMapHot16Big()
     {
-        return CreateRandomScatterSeriesWithColorAxisPlotModel(10000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
+        return CreateRandomScatterSeriesWithColorAxisPlotModel(30000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
     }
 
     private static PlotModel CreateRandomScatterSeriesWithColorAxisPlotModel(int n, OxyPalette palette, MarkerType markerType, AxisPosition colorAxisPosition, OxyColor highColor, OxyColor lowColor)
     {
-        var model = new PlotModel { Title = string.Format("ScatterSeries (n={0})", n), Background = OxyColors.LightGray };
-        var colorAxis = new LinearColorAxis { Position = colorAxisPosition, Palette = palette, Minimum = -1, Maximum = 1, HighColor = highColor, LowColor = lowColor };
+        PlotModel model = new() { Title = string.Format("ScatterSeries (n={0})", n), Background = OxyColors.LightGray };
+        LinearColorAxis colorAxis = new() { Position = colorAxisPosition, Palette = palette, Minimum = -1, Maximum = 1, HighColor = highColor, LowColor = lowColor };
         model.Axes.Add(colorAxis);
         model.Series.Add(CreateRandomScatterSeries(n, markerType, false, true, colorAxis));
         return model;
@@ -231,16 +231,16 @@ public unsafe class Game : IDisposable
 
     private static ScatterSeries CreateRandomScatterSeries(int n, MarkerType markerType, bool setSize, bool setValue, LinearColorAxis colorAxis)
     {
-        var s1 = new ScatterSeries
+        ScatterSeries s1 = new()
         {
             MarkerType = markerType,
             MarkerSize = 6,
             ColorAxisKey = colorAxis?.Key
         };
-        var random = new Random(13);
+        Random random = new(13);
         for (int i = 0; i < n; i++)
         {
-            var p = new ScatterPoint((random.NextDouble() * 2.2) - 1.1, random.NextDouble());
+            ScatterPoint p = new((random.NextDouble() * 2.2) - 1.1, random.NextDouble());
             if (setSize)
             {
                 p.Size = (random.NextDouble() * 5) + 5;

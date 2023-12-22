@@ -2,6 +2,7 @@
 using OxyPlot.SkiaSharp;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using SkiaSharp;
 using System.Numerics;
 using CursorType = OxyPlot.CursorType;
 
@@ -92,7 +93,7 @@ public class PlotView : IPlotView
     {
     }
 
-    public void Render(SkiaCanvas skiaCanvas, Vector2D<float> offset, Vector2D<float> size)
+    public void Render(SkiaCanvas skiaCanvas, Vector2D<float> offset, Vector2D<float> size, bool useGpu = true)
     {
         if (ActualModel == null)
         {
@@ -101,9 +102,24 @@ public class PlotView : IPlotView
 
         ClientArea = new OxyRect(offset.X, offset.Y, size.X, size.Y);
 
-        _renderContext.SkCanvas = skiaCanvas.Surface.Canvas;
+        if (useGpu)
+        {
+            _renderContext.SkCanvas = skiaCanvas.Surface.Canvas;
 
-        ((IPlotModel)ActualModel).Render(_renderContext, ClientArea);
+            ((IPlotModel)ActualModel).Render(_renderContext, ClientArea);
+        }
+        else
+        {
+            using SKSurface surface = SKSurface.Create(new SKImageInfo((int)size.X, (int)size.Y));
+
+            using SKCanvas canvas = surface.Canvas;
+
+            _renderContext.SkCanvas = canvas;
+
+            ((IPlotModel)ActualModel).Render(_renderContext, ClientArea);
+
+            skiaCanvas.Surface.Canvas.DrawSurface(surface, offset.X, offset.Y);
+        }
     }
 
     private void Mouse_MouseDown(IMouse mouse, MouseButton button)
