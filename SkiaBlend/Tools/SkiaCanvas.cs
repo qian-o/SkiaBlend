@@ -46,6 +46,7 @@ public class SkiaCanvas : Canvas
         _gl.ClearColor(clearColor);
         _gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit | (uint)GLEnum.StencilBufferBit);
 
+        Context.PurgeResources();
         Context.ResetContext();
     }
 
@@ -122,8 +123,8 @@ public class SkiaCanvas : Canvas
 
     protected override bool Initialization()
     {
-        _gl.GetInteger(GLEnum.StencilBits, out int stencil);
         _gl.GetInteger(GLEnum.Samples, out int samples);
+        _gl.GetFramebufferAttachmentParameter(GLEnum.Framebuffer, GLEnum.Stencil, GLEnum.FramebufferAttachmentStencilSize, out int stencil_bits);
 
         int maxSamples = Context.GetMaxSurfaceSampleCount(_skFormatAndType);
         if (samples > maxSamples)
@@ -131,7 +132,7 @@ public class SkiaCanvas : Canvas
             samples = maxSamples;
         }
 
-        backendRenderTarget = new((int)Width, (int)Height, samples, stencil, new GRGlFramebufferInfo(_fbo, _skFormatAndType.ToGlSizedFormat()));
+        backendRenderTarget = new((int)Width, (int)Height, samples, stencil_bits, new GRGlFramebufferInfo(_fbo, _skFormatAndType.ToGlSizedFormat()));
         Surface = SKSurface.Create(Context, backendRenderTarget, GRSurfaceOrigin.BottomLeft, _skFormatAndType);
 
         return true;

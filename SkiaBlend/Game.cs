@@ -21,12 +21,12 @@ public unsafe class Game : IDisposable
     private ImGuiController imGuiController = null!;
 
     private SkiaCanvas mainCanvas = null!;
-    private OxyPlotController oxyPlotController = null!;
-    private PlotModel plotModel = null!;
 
     private GLCanvas subCanvas1 = null!;
     private GLCanvas subCanvas2 = null!;
     private Camera camera = null!;
+
+    private PlotView plotView = null!;
 
     #region Input
     private IMouse mouse = null!;
@@ -71,10 +71,14 @@ public unsafe class Game : IDisposable
             Fov = 45.0f
         };
         mainCanvas = new SkiaCanvas(gl, new Vector2D<uint>((uint)Width, (uint)Height), 0);
-        oxyPlotController = new OxyPlotController(mainCanvas, inputContext);
-        plotModel = oxyPlotController.ActualModel;
 
+        subCanvas1 = new GLCanvas(gl, new Vector2D<uint>(600, 400), _window.Samples, mainCanvas);
+        subCanvas2 = new GLCanvas(gl, new Vector2D<uint>(400, 200), _window.Samples, mainCanvas);
+
+        plotView = new PlotView(inputContext);
         {
+            PlotModel plotModel = plotView.ActualModel;
+
             Random random = new();
 
             string xKey = Guid.NewGuid().ToString();
@@ -105,7 +109,7 @@ public unsafe class Game : IDisposable
                 MarkerStrokeThickness = 1.5
             };
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 lineSeries.Points.Add(new DataPoint(i, random.NextDouble()));
                 scatterSeries.Points.Add(new ScatterPoint(i, random.NextDouble()));
@@ -113,10 +117,9 @@ public unsafe class Game : IDisposable
 
             plotModel.Series.Add(lineSeries);
             plotModel.Series.Add(scatterSeries);
-        }
 
-        subCanvas1 = new GLCanvas(gl, new Vector2D<uint>(600, 400), _window.Samples, mainCanvas);
-        subCanvas2 = new GLCanvas(gl, new Vector2D<uint>(400, 200), _window.Samples, mainCanvas);
+            plotModel.InvalidatePlot(true);
+        }
 
         mouse = inputContext.Mice[0];
         keyboard = inputContext.Keyboards[0];
@@ -199,6 +202,8 @@ public unsafe class Game : IDisposable
         DrawGL();
         DrawSkia();
 
+        imGuiController.Update((float)obj);
+
         ImGui.Begin("Info");
         ImGui.Value("FPS", ImGui.GetIO().Framerate);
         ImGui.End();
@@ -224,23 +229,16 @@ public unsafe class Game : IDisposable
         subCanvas2.End();
     }
 
-    private bool first = true;
-
     private void DrawSkia()
     {
         mainCanvas.Begin(Color.White);
-
-        plotModel.InvalidatePlot(first);
-
-        if (first)
-        {
-            first = false;
-        }
 
         mainCanvas.Demo1();
         mainCanvas.DrawCanvas(subCanvas1, new Vector2D<float>(10.0f, 10.0f), Vector2D<float>.One);
         mainCanvas.DrawCanvas(subCanvas2, new Vector2D<float>(Width - subCanvas2.Width - 10, Height - subCanvas2.Height - 10), Vector2D<float>.One);
         mainCanvas.Demo2();
+
+        plotView.Render(mainCanvas, new Vector2D<float>(10.0f, 10.0f), new Vector2D<float>(500.0f, 500.0f));
 
         mainCanvas.End();
     }
