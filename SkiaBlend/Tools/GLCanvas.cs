@@ -154,7 +154,7 @@ public unsafe class GLCanvas : Canvas
             _gl.DeleteTexture(ColorBuffer);
             _gl.DeleteRenderbuffer(DepthRenderBuffer);
 
-            _extMRT.Dispose();
+            _extMRT?.Dispose();
         }
     }
 }
