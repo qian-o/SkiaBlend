@@ -1,9 +1,9 @@
-﻿using OxyPlot;
+﻿using System.Numerics;
+using OxyPlot;
 using OxyPlot.SkiaSharp;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using SkiaSharp;
-using System.Numerics;
 using CursorType = OxyPlot.CursorType;
 
 namespace SkiaBlend.Tools;
