@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Drawing;
+using ImGuiNET;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -8,7 +9,6 @@ using Silk.NET.OpenGLES;
 using Silk.NET.OpenGLES.Extensions.ImGui;
 using Silk.NET.Windowing;
 using SkiaBlend.Tools;
-using System.Drawing;
 
 namespace SkiaBlend;
 
@@ -217,7 +217,7 @@ public unsafe class Game : IDisposable
 
     public static PlotModel ColorMapHot16Big()
     {
-        return CreateRandomScatterSeriesWithColorAxisPlotModel(30000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
+        return CreateRandomScatterSeriesWithColorAxisPlotModel(60000, OxyPalettes.Hot(16), MarkerType.Square, AxisPosition.Right, OxyColors.Undefined, OxyColors.Undefined);
     }
 
     private static PlotModel CreateRandomScatterSeriesWithColorAxisPlotModel(int n, OxyPalette palette, MarkerType markerType, AxisPosition colorAxisPosition, OxyColor highColor, OxyColor lowColor)

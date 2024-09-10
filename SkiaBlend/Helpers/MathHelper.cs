@@ -794,11 +794,11 @@ public static class MathHelper
     {
         unsafe
         {
-            var xhalf = 0.5f * x;
-            var i = *(int*)&x; // Read bits as integer.
+            float xhalf = 0.5f * x;
+            int i = *(int*)&x; // Read bits as integer.
             i = 0x5f375a86 - (i >> 1); // Make an initial guess for Newton-Raphson approximation
             x = *(float*)&i; // Convert bits back to float
-            x *= 1.5f - xhalf * x * x; // Perform left single Newton-Raphson step.
+            x *= 1.5f - (xhalf * x * x); // Perform left single Newton-Raphson step.
             return x;
         }
     }
@@ -825,7 +825,7 @@ public static class MathHelper
             long i = *(long*)&x; // Read bits as long.
             i = 0x5fe6eb50c7b537a9 - (i >> 1); // Make an initial guess for Newton-Raphson approximation
             x = *(double*)&i; // Convert bits back to double
-            x *= 1.5 - xhalf * x * x; // Perform left single Newton-Raphson step.
+            x *= 1.5 - (xhalf * x * x); // Perform left single Newton-Raphson step.
             return x;
         }
     }
@@ -940,7 +940,7 @@ public static class MathHelper
     {
         int inRange = valueMax - valueMin;
         int resultRange = resultMax - resultMin;
-        return resultMin + resultRange * ((value - valueMin) / inRange);
+        return resultMin + (resultRange * ((value - valueMin) / inRange));
     }
 
     /// <summary>
@@ -958,7 +958,7 @@ public static class MathHelper
     {
         float inRange = valueMax - valueMin;
         float resultRange = resultMax - resultMin;
-        return resultMin + resultRange * ((value - valueMin) / inRange);
+        return resultMin + (resultRange * ((value - valueMin) / inRange));
     }
 
     /// <summary>
@@ -976,7 +976,7 @@ public static class MathHelper
     {
         double inRange = valueMax - valueMin;
         double resultRange = resultMax - resultMin;
-        return resultMin + resultRange * ((value - valueMin) / inRange);
+        return resultMin + (resultRange * ((value - valueMin) / inRange));
     }
 
     /// <summary>
@@ -1005,7 +1005,7 @@ public static class MathHelper
             l = int.MinValue - l;
         }
 
-        var intDiff = Math.Abs(k - l);
+        long intDiff = Math.Abs(k - l);
         return intDiff <= 1 << maxDeltaBits;
     }
 
@@ -1024,9 +1024,9 @@ public static class MathHelper
     public static bool ApproximatelyEqualEpsilon(double a, double b, double epsilon)
     {
         const double doubleNormal = (1L << 52) * double.Epsilon;
-        var absA = Math.Abs(a);
-        var absB = Math.Abs(b);
-        var diff = Math.Abs(a - b);
+        double absA = Math.Abs(a);
+        double absB = Math.Abs(b);
+        double diff = Math.Abs(a - b);
 
         if (a == b)
         {
@@ -1060,9 +1060,9 @@ public static class MathHelper
     public static bool ApproximatelyEqualEpsilon(float a, float b, float epsilon)
     {
         const float floatNormal = (1 << 23) * float.Epsilon;
-        var absA = Math.Abs(a);
-        var absB = Math.Abs(b);
-        var diff = Math.Abs(a - b);
+        float absA = Math.Abs(a);
+        float absB = Math.Abs(b);
+        float diff = Math.Abs(a - b);
 
         if (a == b)
         {
@@ -1078,7 +1078,7 @@ public static class MathHelper
         }
 
         // use relative error
-        var relativeError = diff / Math.Min(absA + absB, float.MaxValue);
+        float relativeError = diff / Math.Min(absA + absB, float.MaxValue);
         return relativeError < epsilon;
     }
 
@@ -1101,7 +1101,7 @@ public static class MathHelper
             return true;
         }
 
-        var diff = Math.Abs(a - b);
+        float diff = Math.Abs(a - b);
         return diff <= tolerance;
     }
 
@@ -1124,7 +1124,7 @@ public static class MathHelper
             return true;
         }
 
-        var diff = Math.Abs(a - b);
+        double diff = Math.Abs(a - b);
         return diff <= tolerance;
     }
 
@@ -1139,7 +1139,7 @@ public static class MathHelper
     public static float Lerp(float start, float end, float t)
     {
         t = Math.Clamp(t, 0, 1);
-        return start + t * (end - start);
+        return start + (t * (end - start));
     }
 
     /// <summary>
@@ -1153,7 +1153,7 @@ public static class MathHelper
     public static double Lerp(double start, double end, double t)
     {
         t = Math.Clamp(t, 0, 1);
-        return start + t * (end - start);
+        return start + (t * (end - start));
     }
 
     public static Vector3 Lerp(Vector3 a, Vector3 b, Vector3 c)

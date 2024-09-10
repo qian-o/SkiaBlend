@@ -1,7 +1,7 @@
-﻿using Silk.NET.Maths;
+﻿using System.Runtime.InteropServices;
+using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
 using SkiaBlend.Shaders;
-using System.Runtime.InteropServices;
 
 namespace SkiaBlend.Tools;
 

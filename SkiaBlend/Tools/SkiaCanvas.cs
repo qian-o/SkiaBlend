@@ -1,8 +1,8 @@
-﻿using Silk.NET.Maths;
+﻿using System.Drawing;
+using Silk.NET.Maths;
 using Silk.NET.OpenGLES;
 using SkiaBlend.Helpers;
 using SkiaSharp;
-using System.Drawing;
 
 namespace SkiaBlend.Tools;
 
@@ -100,10 +100,10 @@ public class SkiaCanvas : Canvas
         Surface.Canvas.DrawCircle(Width / 2, Height / 2, 100, paint);
 
         paint.Color = SKColors.Green;
-        Surface.Canvas.DrawCircle(Width / 2 + 100, Height / 2, 100, paint);
+        Surface.Canvas.DrawCircle((Width / 2) + 100, Height / 2, 100, paint);
 
         paint.Color = SKColors.Blue;
-        Surface.Canvas.DrawCircle(Width / 2 + 200, Height / 2, 100, paint);
+        Surface.Canvas.DrawCircle((Width / 2) + 200, Height / 2, 100, paint);
     }
 
     public void Demo2()
